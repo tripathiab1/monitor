@@ -76,17 +76,6 @@ class Supervisor(Daemon):
             settings.nthreads += 1
             break
 
-        i = 0
-
-        while True:
-            logger.info('run loop')
-            try:
-                i += 1
-                gc.collect()
-                time.sleep(MAIN_SLEEP)
-            except:
-                pass
-
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         cmd = 'start'

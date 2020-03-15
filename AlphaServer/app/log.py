@@ -23,5 +23,5 @@ def log_setup(comp_logger, log_level):
     file_handler.setFormatter(GlogFormatter())
     file_handler.setLevel(log_level)
     logger.addHandler(file_handler)
-
+    logger.propagate = 0
     return logger

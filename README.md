@@ -10,17 +10,18 @@ This tool has two main components:
 2. AlphaClient
 ```
 
-# Supported Features
+## Supported Features
 
 ```
-1. Client push all ssh attempts to server and server keeps the message in log file
+1. Client push all ssh attempts (successful and failed both) to server and server keeps the message in log file
 ```
+
 
 ## Supported OS
 
 ```
 1. Mac os
-2. Linux (next release)
+2. Linux: ubuntu and (others will be next release) 
 3. Windows (next release)
 ```
 
@@ -118,7 +119,7 @@ It is responsible to collect and push data to configured AlphaServers.
 
 ```
 $ git clone git@github.com:codeArrow/vm-monitor.git
-$ cd vm-monitor/AlphaServer
+$ cd vm-monitor/AlphaClient
 $ virtualenv -p python3 .venv
 $ source .venv/bin/activate
 $ pip3 install -r requirements.txt
@@ -133,5 +134,21 @@ Now you can monoitor log:
 $ tail -f logs/monitor.logs
 ```
 
+## Configure AlphaClient with AlphaServer
+TODO
+
+## Output
+Output in the server log file will be look like:
+
+```
+I0315 21:51:45.001238 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+I0315 21:51:55.034612 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+I0315 21:52:05.076610 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+I0315 21:52:15.105317 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+I0315 21:52:25.137299 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+I0315 21:52:35.167284 66107 ssh_handle.py:23] {'resp': '{"host_name": "Ashtas-Mac-Pro.local", "ssh_attempts": 18}'}
+```
+
+
 ## Future feature
-Will add monitoring for Linux and Windows OS as well
+Will add monitoring for Windows OS as well

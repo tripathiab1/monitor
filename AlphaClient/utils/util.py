@@ -32,11 +32,13 @@ class SSHUtil:
 
     def __init__(self, system_name=None):
         self.system_name = system_name
+        self.log_files = ['/var/log/secure', '/var/log/system.log', '/var/log/auth.log']
         self.cmd_darwin_succ = 'cat /var/log/system.log | grep sshd | grep USER_PROCESS  | wc -l'
         self.cmd_darwin_failed = 'cat /var/log/system.log | grep com.openssh.sshd | wc -l'
         self.cmd_linux_succ = 'cat /var/log/auth.log | grep sshd | grep "Accepted password" | wc -l'
         self.cmd_linux_failed_1 = 'cat /var/log/auth.log | grep sshd | grep "Failed password" | wc -l'
         self.cmd_linux_failed_2 = 'cat /var/log/auth.log | grep sshd | grep "Invalid user" | wc -l'
+
 
     def successful_attempts(self):
         cmd = ''
@@ -95,7 +97,26 @@ class MonitorUtils(RESTfulOperation):
         pass
 
     def monitor_linux(self):
-        pass
+        try:
+            ssh_attempts =  (SSHUtil('Linux').get_ssh_attempts())
+            logger.info('SSH Attempts: %s' % ssh_attempts)
+            resp_data = {
+                'host_name': self.host_name,
+                'ssh_attempts': ssh_attempts
+            }
+            for server_url in PUSH_SERVER_URLS:
+                 try:
+                     url = SSH_ATTEMPTS_URL % server_url
+                     resp = self.post(url, resp_data)
+                     if resp.status_code != 200:
+                         logger.error("Failed to push on %s" % server_url)
+                         continue
+
+                 except Exception as err:
+                     logger.error(err)
+
+        except Exception as err:
+            logger.error(err)
 
     def monitor_darwin(self):
         try:
@@ -126,5 +147,5 @@ class MonitorUtils(RESTfulOperation):
             self.monitor_darwin()
         elif system_name == 'Linux':
             self.monitor_linux()
-        elif system_name == 'windows':
+        elif system_name == 'Windows':
             self.monitor_windows()

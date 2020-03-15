@@ -19,6 +19,8 @@ class SSHAttempts(BaseResource):
         resp = {}
         try:
             req_data = req.stream.read(req.content_length or 0).decode('utf-8')
+            resp = {"resp": req_data}
+            LOG.info(resp)
         except Exception as err:
             resp = {
                      "message": {
@@ -30,7 +32,5 @@ class SSHAttempts(BaseResource):
             LOG.error(resp)
             self.on_error(res, json.dumps(resp))
 
-        resp = {"resp": req_data}
-        LOG.info(resp)
         self.on_success(res, json.dumps(resp))
 
