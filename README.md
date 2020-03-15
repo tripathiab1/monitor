@@ -10,17 +10,18 @@ This tool has two main components:
 2. AlphaClient
 ```
 
-# Supported Features
+## Supported Features
 
 ```
-1. Client push all ssh attempts to server and server keeps the message in log file
+1. Client push all ssh attempts (successful and failed both) to server and server keeps the message in log file
 ```
+
 
 ## Supported OS
 
 ```
 1. Mac os
-2. Linux (next release)
+2. Linux: ubuntu and (others will be next release) 
 3. Windows (next release)
 ```
 
@@ -118,7 +119,7 @@ It is responsible to collect and push data to configured AlphaServers.
 
 ```
 $ git clone git@github.com:codeArrow/vm-monitor.git
-$ cd vm-monitor/AlphaServer
+$ cd vm-monitor/AlphaClient
 $ virtualenv -p python3 .venv
 $ source .venv/bin/activate
 $ pip3 install -r requirements.txt
@@ -133,5 +134,8 @@ Now you can monoitor log:
 $ tail -f logs/monitor.logs
 ```
 
+## Configure AlphaClient with AlphaServer
+TODO
+
 ## Future feature
-Will add monitoring for Linux and Windows OS as well
+Will add monitoring for Windows OS as well

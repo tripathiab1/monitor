@@ -32,11 +32,13 @@ class SSHUtil:
 
     def __init__(self, system_name=None):
         self.system_name = system_name
+        self.log_files = ['/var/log/secure', '/var/log/system.log', '/var/log/auth.log']
         self.cmd_darwin_succ = 'cat /var/log/system.log | grep sshd | grep USER_PROCESS  | wc -l'
         self.cmd_darwin_failed = 'cat /var/log/system.log | grep com.openssh.sshd | wc -l'
         self.cmd_linux_succ = 'cat /var/log/auth.log | grep sshd | grep "Accepted password" | wc -l'
         self.cmd_linux_failed_1 = 'cat /var/log/auth.log | grep sshd | grep "Failed password" | wc -l'
         self.cmd_linux_failed_2 = 'cat /var/log/auth.log | grep sshd | grep "Invalid user" | wc -l'
+
 
     def successful_attempts(self):
         cmd = ''
