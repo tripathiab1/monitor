@@ -34,17 +34,24 @@ class SSHUtil:
         self.system_name = system_name
         self.cmd_darwin_succ = 'cat /var/log/system.log | grep sshd | grep USER_PROCESS  | wc -l'
         self.cmd_darwin_failed = 'cat /var/log/system.log | grep com.openssh.sshd | wc -l'
+        self.cmd_linux_succ = 'cat /var/log/auth.log | grep sshd | grep "Accepted password" | wc -l'
+        self.cmd_linux_failed_1 = 'cat /var/log/auth.log | grep sshd | grep "Failed password" | wc -l'
+        self.cmd_linux_failed_2 = 'cat /var/log/auth.log | grep sshd | grep "Invalid user" | wc -l'
 
     def successful_attempts(self):
         cmd = ''
         attempts = 0
         try:
+            cmd_list = []
             if self.system_name == 'Darwin':
-                cmd = self.cmd_darwin_succ
+                cmd_list.append(self.cmd_darwin_succ)
+            elif self.system_name == 'Linux':
+                cmd_list.append(self.cmd_linux_succ)
 
-            output = subprocess.check_output(cmd, shell=True)
-            output = output.decode('utf-8').strip()
-            attempts = int(output)
+            for cmd in cmd_list:
+                output = subprocess.check_output(cmd, shell=True)
+                output = output.decode('utf-8').strip()
+                attempts += int(output)
         except Exception as err:
             logger.error(err)
 
@@ -54,12 +61,18 @@ class SSHUtil:
         cmd = ''
         attempts = 0
         try:
+            cmd_list = []
             if self.system_name == 'Darwin':
-                cmd = self.cmd_darwin_failed
+                cmd_list.append(self.cmd_darwin_failed)
+            elif self.system_name == 'Linux':
+                cmd_list.append(self.cmd_linux_failed_1)
+                cmd_list.append(self.cmd_linux_failed_2)
 
-            output = subprocess.check_output(cmd, shell=True)
-            output = output.decode('utf-8').strip()
-            attempts = int(output)
+            for cmd in cmd_list:
+                output = subprocess.check_output(cmd, shell=True)
+                output = output.decode('utf-8').strip()
+                attempts += int(output)
+
         except Exception as err:
             logger.error(err)
 
