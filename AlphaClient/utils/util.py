@@ -6,6 +6,8 @@ import socket
 import requests
 from utils.endpoints import *
 from config import PUSH_SERVER_URLS
+import psutil
+
 
 logger = logging.getLogger("monitor")
 
@@ -27,6 +29,33 @@ class RESTfulOperation:
 
         return resp
 
+
+class MachineUtils:
+
+    def get_hardware_details(self):
+        cpu_count = psutil.cpu_count(logical=False)
+        disk_partitions = psutil.disk_partitions()
+        disk_io_counters = psutil.disk_io_counters(perdisk=True)
+        disk_io_counters = [{k:dict(v._asdict())} for k, v in disk_io_counters.items()]
+        net_io_counters = psutil.net_io_counters()
+        net_io_counters = dict(net_io_counters._asdict())
+        net_conns = psutil.net_connections()
+        net_connections = {}
+        for nc in net_conns:
+            info = dict(nc.laddr._asdict())
+            net_connections[nc.pid] =  {'info': info, 'status': nc.status}
+
+        net_if_addrs = psutil.net_if_addrs()
+        net_if_addrs = [{k: v[0].address} for k, v in net_if_addrs.items() if v[0].family.name == 'AF_INET']
+        battery = dict(psutil.sensors_battery()._asdict())
+        users = [dict(x._asdict()) for x in psutil.users()]
+
+        info =  {'cpu_count': cpu_count, 'disk_partitions': disk_partitions,
+                'disk_io_counters': disk_io_counters, 'net_io_counters': net_io_counters,
+                'net_connections': net_connections, 'net_if_addrs': net_if_addrs,
+                 'battery': battery, 'users': users}
+
+        return info
 
 class SSHUtil:
 
@@ -85,7 +114,7 @@ class SSHUtil:
         succ_attempt = self.successful_attempts()
         failed_attempt = self.failed_attempts()
 
-        return succ_attempt + failed_attempt
+        return succ_attempt, failed_attempt
 
 # utils for monitor client daemon 
 class MonitorUtils(RESTfulOperation):
@@ -98,11 +127,13 @@ class MonitorUtils(RESTfulOperation):
 
     def monitor_linux(self):
         try:
-            ssh_attempts =  (SSHUtil('Linux').get_ssh_attempts())
-            logger.info('SSH Attempts: %s' % ssh_attempts)
+            ssh_succ_attempts, ssh_failed_attempts =  (SSHUtil('Linux').get_ssh_attempts())
+            machine_info = MachineUtils().get_hardware_details()
+            logger.info('SSH Attempts: %s' % (ssh_succ_attempts + ssh_failed_attempts))
             resp_data = {
                 'host_name': self.host_name,
-                'ssh_attempts': ssh_attempts
+                'ssh_attempts': {'ssh_succ_attempts': ssh_succ_attempts, 'ssh_failed_attempts': ssh_failed_attempts},
+                'machine_info': machine_info
             }
             for server_url in PUSH_SERVER_URLS:
                  try:
@@ -120,11 +151,13 @@ class MonitorUtils(RESTfulOperation):
 
     def monitor_darwin(self):
         try:
-            ssh_attempts =  (SSHUtil('Darwin').get_ssh_attempts())
-            logger.info('SSH Attempts: %s' % ssh_attempts)
+            ssh_succ_attempts, ssh_failed_attempts =  (SSHUtil('Darwin').get_ssh_attempts())
+            machine_info = MachineUtils().get_hardware_details()
+            logger.info('SSH Attempts: %s' % (ssh_succ_attempts + ssh_failed_attempts))
             resp_data = {
                 'host_name': self.host_name,
-                'ssh_attempts': ssh_attempts
+                'ssh_attempts': {'ssh_succ_attempts': ssh_succ_attempts, 'ssh_failed_attempts': ssh_failed_attempts},
+                'machine_info': machine_info
             }
             for server_url in PUSH_SERVER_URLS:
                  try:
@@ -149,3 +182,6 @@ class MonitorUtils(RESTfulOperation):
             self.monitor_linux()
         elif system_name == 'Windows':
             self.monitor_windows()
+
+
+
